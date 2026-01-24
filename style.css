@@ -315,3 +315,90 @@ body {
 #detail-link a:hover {
     opacity: 0.7;
 }
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    body {
+        overflow: auto;
+        /* Allow body scroll on mobile if needed */
+    }
+
+    .container {
+        flex-direction: column;
+        height: auto;
+        width: 100%;
+        overflow-x: hidden;
+    }
+
+    .column {
+        width: 100% !important;
+        height: auto;
+        padding: 20px;
+        border: none;
+        overflow: visible;
+    }
+
+    /* Left Column (Nav) on Mobile */
+    .column.left {
+        order: 1;
+        padding-bottom: 0;
+    }
+
+    .nav-content {
+        margin-bottom: 2rem;
+    }
+
+    .sns-links {
+        display: none;
+        /* Hide SNS on mobile to save space, or keep if preferred */
+    }
+
+    /* Center Column (List) on Mobile */
+    .column.center {
+        order: 2;
+        padding-top: 0;
+        padding-bottom: 40px;
+        height: auto;
+        overflow-y: visible;
+        /* Let body scroll handle it */
+    }
+
+    /* Right Column (Detail) on Mobile - Hidden by default */
+    .column.right {
+        display: none;
+        order: 3;
+        padding-top: 20px;
+        height: auto;
+        overflow-y: visible;
+    }
+
+    /* Mobile Back Button - Visible only on mobile */
+    #mobile-back-btn {
+        display: block !important;
+        font-size: 1.2rem;
+        margin-bottom: 1.5rem;
+    }
+
+    /*
+      State: Detail Open (Mobile)
+      - Hide Left and Center
+      - Show Right
+    */
+    body.mobile-detail-open .container {
+        height: 100vh;
+        overflow: hidden;
+    }
+
+    body.mobile-detail-open .column.left,
+    body.mobile-detail-open .column.center {
+        display: none;
+    }
+
+    body.mobile-detail-open .column.right {
+        display: block;
+        height: 100vh;
+        overflow-y: auto;
+        padding-top: 40px;
+        /* Add some top padding for back button */
+    }
+}

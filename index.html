@@ -57,6 +57,11 @@
                 <img src="" id="preview-image" alt="">
 
                 <div id="detail-area" style="display: none;">
+                    <!-- Mobile Back Button -->
+                    <div id="mobile-back-btn" onclick="resetView()"
+                        style="display:none; cursor:pointer; margin-bottom: 20px;">
+                        ← Back
+                    </div>
                     <h2 id="detail-title"></h2>
 
                     <div id="youtube-embed" style="margin: 1.5rem 0;"></div>
@@ -160,6 +165,9 @@
             // Lock center column scrolling
             document.querySelector('.column.center').style.overflowY = 'hidden';
 
+            // Mobile: Add class to body to switch views
+            document.body.classList.add('mobile-detail-open');
+
             // 1. Toggle visibility (Transparency) FIRST to ensure UI feedback
             // Use workList.children for more robust selection
             const allItems = Array.from(workList.children);
@@ -262,6 +270,9 @@
             // Unlock center column scrolling
             document.querySelector('.column.center').style.overflowY = 'auto';
 
+            // Mobile: Add class to body
+            document.body.classList.add('mobile-detail-open');
+
             // Clear other secondary nav items (if any in future)
             document.querySelectorAll('.secondary-nav li').forEach(li => li.classList.remove('active'));
             // Clear all 'related' highlights from categories
@@ -297,6 +308,10 @@
         function resetView() {
             // Unlock center column scrolling
             document.querySelector('.column.center').style.overflowY = 'auto';
+
+            // Mobile: Remove class from body
+            document.body.classList.remove('mobile-detail-open');
+
             currentActiveItem = null;
             currentActiveTitle = null;
             detailArea.style.display = 'none';
