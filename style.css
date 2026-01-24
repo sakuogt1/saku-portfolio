@@ -346,11 +346,16 @@ body {
 
     .nav-content {
         margin-bottom: 2rem;
+        /* Keep some bottom margin for nav content */
     }
 
     .sns-links {
-        display: none;
-        /* Hide SNS on mobile to save space, or keep if preferred */
+        display: block;
+        /* Show SNS on mobile */
+        margin-top: 0;
+        /* Remove top margin so it sits closer to nav */
+        margin-bottom: 2rem;
+        /* Add bottom margin to separate from work list */
     }
 
     /* Center Column (List) on Mobile */
