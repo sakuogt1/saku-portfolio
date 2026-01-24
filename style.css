@@ -386,6 +386,7 @@ body {
     */
     body.mobile-detail-open .container {
         height: 100vh;
+        height: 100dvh;
         overflow: hidden;
     }
 
@@ -397,6 +398,7 @@ body {
     body.mobile-detail-open .column.right {
         display: block;
         height: 100vh;
+        height: 100dvh;
         overflow-y: auto;
         padding-top: 40px;
         /* Add some top padding for back button */
