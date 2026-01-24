@@ -1,0 +1,317 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-style: normal;
+    /* 強制的に斜体を防ぐ */
+}
+
+body {
+
+    font-family: "Zalando Sans", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 250;
+    font-style: normal;
+    background-color: #f3f3f3;
+    color: #434343;
+    overflow: hidden;
+    /* 1画面に収める */
+}
+
+.container {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+}
+
+.column {
+    height: 100%;
+    padding: 40px;
+    border-right: 0px solid #eee;
+}
+
+/* 各カラムの幅設定 */
+.left {
+    width: 20%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.sns-links a {
+    display: block;
+    color: #848484;
+    text-decoration: none;
+    font-size: 0.8rem;
+    margin-bottom: 6px;
+    width: fit-content;
+    border-bottom: 1px solid transparent;
+    width: fit-content;
+    border-bottom: 1px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.sns-links .contact-email {
+    font-size: 0.8rem;
+    color: #848484;
+    margin-bottom: 6px;
+    width: fit-content;
+}
+
+.sns-links a:hover {
+    color: #333;
+    border-bottom: 1px solid #333;
+}
+
+.center {
+    width: 30%;
+    overflow-y: auto;
+}
+
+.right {
+    width: 50%;
+    border-right: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 名前とナビゲーション */
+.my-name {
+    font-size: 1.1rem;
+    font-weight: 300;
+    margin-bottom: 2rem;
+}
+
+/* カテゴリーの基本スタイル（最初は少し薄くしておく） */
+/* style.css */
+/* style.css */
+.category-nav li {
+    list-style: none;
+    cursor: pointer;
+    margin-bottom: 6px;
+    font-size: 0.9rem;
+    color: #bbb;
+    clear: both;
+    display: block;
+    width: 100%;
+    /* Hit area full width */
+}
+
+.category-nav li span {
+    display: inline-block;
+    border-bottom: 1px solid transparent;
+    transition: border-bottom 0s ease;
+}
+
+/* ホバーした時：色は変えず、アンダーバーだけ出す */
+.category-nav li:hover span {
+    color: #bbb;
+    border-bottom: 1px solid #bbb;
+}
+
+/* 選択中（クリック後）の状態：ここだけ真っ黒にする */
+.category-nav li.active span,
+.secondary-nav li.active span {
+    color: #000 !important;
+    border-bottom: 1px solid #000 !important;
+}
+
+/* 関連カテゴリ（選択された作品に関連するもの） */
+.category-nav li.related {
+    color: #414141;
+}
+
+/* Secondary Nav Styling (Same as category nav) */
+.secondary-nav li {
+    list-style: none;
+    cursor: pointer;
+    margin-bottom: 6px;
+    font-size: 0.9rem;
+    color: #414141;
+    clear: both;
+    display: block;
+    width: 100%;
+    /* Hit area full width */
+}
+
+.secondary-nav li span {
+    display: inline-block;
+    border-bottom: 1px solid transparent;
+}
+
+.secondary-nav li:hover span {
+    color: #bbb;
+    border-bottom: 1px solid #bbb;
+}
+
+/* 中央カラムの設定 */
+.column.center {
+    width: 40%;
+    overflow-y: auto;
+    padding: 40px;
+    /* すでに設定されている場合 */
+
+    /* リストを下に下げるための余白を追加 */
+    padding-top: 12.6vh;
+}
+
+/* 作品リスト */
+.work-item {
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin-bottom: 0.18rem;
+    cursor: pointer;
+}
+
+.work-item:hover {
+    border-bottom: 0.5px solid #333;
+}
+
+/* プレビュー画像 */
+#preview-container {
+    width: 100%;
+    opacity: 0;
+}
+
+#preview-image {
+    width: 100%;
+    height: auto;
+}
+
+/* 右カラムの詳細エリア */
+#detail-area {
+    width: 100%;
+    color: #333;
+}
+
+#detail-title {
+    font-size: 1rem;
+    font-weight: normal;
+    margin-bottom: 0.5rem;
+    border-bottom: 0.5px solid #eee;
+    padding-bottom: 0.1rem;
+}
+
+#detail-description {
+    font-size: 0.8rem;
+    line-height: 1.8;
+    margin-bottom: 1.5rem;
+}
+
+#youtube-embed {
+    margin-top: 0.6rem;
+    background: #000;
+    /* 読み込み前の黒枠 */
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 選択されていない他の作品リスト */
+.work-item.is-disabled {
+    opacity: 0.0 !important;
+    /* 透明にする（薄くしたい場合は0.1など） */
+    pointer-events: none;
+    /* クリックやホバーを無効化 */
+    transition: opacity 0.1s ease;
+}
+
+/* 選択中の作品 */
+.work-item.active {
+    opacity: 1;
+    border-bottom: 1.1px solid #333;
+}
+
+/* 基本スタイルにアニメーションを追加 */
+.work-item {
+    transition: opacity 0.1s ease, border-bottom 0.2s ease;
+}
+
+#detail-credits {
+    white-space: pre-wrap;
+    /* 改行を有効にする */
+    line-height: 1.6;
+    color: #666;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #eee;
+    /* 区切り線 */
+}
+
+#detail-extra-images {
+    margin-top: 1rem;
+}
+
+#detail-extra-images img {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+/* 右カラム：中身を上から並べる設定に変更 */
+.column.right {
+    width: 35%;
+    border-right: none;
+    display: block;
+    /* 中央寄せをやめる */
+    padding: 40px;
+    padding-top: 14vh;
+    overflow-y: auto;
+    /* 詳細が長い場合にスクロール可能に */
+}
+
+/* ホバー画像のデザイン：上側に配置 */
+#preview-image {
+    width: 100%;
+    height: auto;
+    display: block;
+    margin-bottom: 2rem;
+}
+
+/* 詳細エリア全体の余白 */
+#detail-area {
+    width: 100%;
+}
+
+/* YouTubeの埋め込み */
+#youtube-embed {
+    margin: 1.5rem 0;
+    width: 100%;
+}
+
+/* クレジット部分：区切り線とフォントサイズ */
+#detail-credits {
+    white-space: pre-wrap;
+    font-size: 0.85rem;
+    line-height: 1.8;
+    color: #666;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px dotted #ccc;
+}
+
+/* Link in detail area */
+#detail-link {
+    margin-bottom: 1.0rem;
+}
+
+#detail-link a {
+    color: #333;
+    text-decoration: underline;
+    font-size: 0.75rem;
+    transition: opacity 0.2s ease;
+}
+
+#detail-link a:hover {
+    opacity: 0.7;
+}

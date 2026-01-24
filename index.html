@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saku | Portfolio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Libre+Franklin:ital,wght@0,100..900;1,100..900&family=Lilex:ital,wght@0,100..700;1,100..700&family=Zalando+Sans:ital,wght@0,200..900;1,200..900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="container">
+        <header class="column left">
+            <div class="nav-content">
+                <h1 class="my-name" onclick="filterWorks('all', null);" style="cursor:pointer;">
+                    Saku
+                </h1>
+                <nav class="category-nav">
+                    <ul>
+                        <li id="cat-all" class="active" onclick="filterWorks('all', this)"><span>all</span></li>
+                        <li onclick="filterWorks('client works', this)"><span>client works</span></li>
+                        <li onclick="filterWorks('personal works', this)"><span>personal works</span></li>
+                        <li onclick="filterWorks('original', this)"><span>original</span></li>
+                        <li onclick="filterWorks('collaborate', this)"><span>collaborate</span></li>
+                        <li onclick="filterWorks('remix', this)"><span>remix</span></li>
+                        <li onclick="filterWorks('live', this)"><span>live</span></li>
+                        <li onclick="filterWorks('exhibition', this)"><span>exhibition</span></li>
+                        <li onclick="filterWorks('award', this)"><span>award</span></li>
+                    </ul>
+                </nav>
+                <nav class="secondary-nav" style="margin-top: 3rem;">
+                    <ul>
+                        <li onclick="showInfoPage('about', this)"><span>about</span></li>
+                    </ul>
+                </nav>
+            </div>
+
+            <div class="sns-links">
+                <a href="https://www.instagram.com/sakuogt/" target="_blank">Instagram</a>
+                <!-- <br> -->
+                <a href="https://x.com/sakuogt" target="_blank">X (Twitter)</a>
+                <p class="contact-email">sakuogt.music@gmail.com</p>
+            </div>
+        </header>
+
+        <main class="column center">
+            <div id="work-list"></div>
+        </main>
+
+        <aside class="column right">
+            <div id="preview-container">
+                <img src="" id="preview-image" alt="">
+
+                <div id="detail-area" style="display: none;">
+                    <h2 id="detail-title"></h2>
+
+                    <div id="youtube-embed" style="margin: 1.5rem 0;"></div>
+
+                    <p id="detail-description"></p>
+                    <div id="detail-link" style="display: none;"></div>
+                    <div id="detail-credits"></div>
+
+                    <div id="detail-extra-images"></div>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <script>
+        // 【1】作品データ（カンマ等のミスを修正しました）
+        const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbz4WHpFwnlDnOdw7FjJAKkGLH5nsSYt2lcUeK1MGOWP2GUxLiHou0Fdpyev7lnWeW0Q/exec';
+
+        // Data will be fetched from GAS. Initialized as empty.
+        let works = [];
+
+        const infoData = {
+            about: {
+                title: "Saku",
+                image: "cover art/saku&miku.JPG",
+                description: "2002年生まれ神奈川県出身。ボカロP。九州大学芸術工学府所属。初音ミクとエレクトロニカを軸に、楽曲提供、リミックス、ライブパフォーマンスなど幅広く活動する。現在の主なプロジェクトには、初音ミクの音素に注目したソロ名義「Kyototower」、4人のボカロPによるユニット「サタスコ」など。\nBorn in 2002. I am a Vocaloid P. With Hatsune Miku and electronica as the foundation of my work, I engage in various activities such as composing music for clients, creating remixes, and performing live. My primary current projects are: Kyototower, a solo project focusing on the phonemes (individual sound elements) of Hatsune Miku; and サタスコ(satasuko),  a unit composed of four friends."
+            }
+        };
+
+        // 【2】変数の管理
+        let currentActiveItem = null;
+        let currentActiveTitle = null;
+
+        const workList = document.getElementById('work-list');
+        const previewImg = document.getElementById('preview-image');
+        const previewContainer = document.getElementById('preview-container');
+        const detailArea = document.getElementById('detail-area');
+        const detailTitle = document.getElementById('detail-title');
+        const detailDesc = document.getElementById('detail-description');
+        const detailLink = document.getElementById('detail-link');
+        const mediaContainer = document.getElementById('youtube-embed');
+        const detailCredits = document.getElementById('detail-credits');
+        const detailExtraImages = document.getElementById('detail-extra-images');
+
+        // 【3】表示関数
+        function displayWorks(filter) {
+            workList.innerHTML = '';
+            const filtered = filter === 'all' ? works : works.filter(w => {
+                if (Array.isArray(w.category)) {
+                    return w.category.includes(filter);
+                }
+                return w.category === filter;
+            });
+
+            filtered.forEach(work => {
+                const item = document.createElement('div');
+                item.className = 'work-item';
+                item.innerText = work.title;
+
+                // Restore persistent state
+                if (currentActiveTitle) {
+                    if (work.title === currentActiveTitle) {
+                        item.classList.add('active');
+                        currentActiveItem = item; // Re-bind the element reference
+                    } else {
+                        item.classList.add('is-disabled');
+                    }
+                }
+
+                item.onmouseenter = () => {
+                    if (currentActiveItem) return;
+                    previewImg.style.display = 'block';
+                    detailArea.style.display = 'none';
+                    previewImg.src = work.image;
+                    previewContainer.style.opacity = '1';
+
+                    // Clear about/secondary nav active state when hovering works
+                    document.querySelectorAll('.secondary-nav li').forEach(li => li.classList.remove('active'));
+                };
+
+                item.onmouseleave = () => {
+                    if (currentActiveItem) return;
+                    previewContainer.style.opacity = '0';
+                };
+
+                item.onclick = () => {
+                    if (currentActiveItem === item || (currentActiveTitle && currentActiveTitle === work.title)) {
+                        resetView();
+                    } else {
+                        selectWork(item, work);
+                    }
+                };
+                workList.appendChild(item);
+            });
+        }
+
+        // 【4】選択（ロック）状態にする関数
+        function selectWork(element, data) {
+            currentActiveItem = element;
+            currentActiveTitle = data.title;
+            // Lock center column scrolling
+            document.querySelector('.column.center').style.overflowY = 'hidden';
+
+            // 1. Toggle visibility (Transparency) FIRST to ensure UI feedback
+            // Use workList.children for more robust selection
+            const allItems = Array.from(workList.children);
+            allItems.forEach(el => {
+                if (el === element) {
+                    el.classList.add('active');
+                    el.classList.remove('is-disabled');
+                } else {
+                    el.classList.remove('active');
+                    el.classList.add('is-disabled');
+                }
+            });
+
+            // 2. Remove active from about/secondary nav
+            document.querySelectorAll('.secondary-nav li').forEach(li => li.classList.remove('active'));
+
+            // 3. Clear 'related' class from all categories
+            document.querySelectorAll('.category-nav li').forEach(li => li.classList.remove('related'));
+
+            // 4. Highlight related categories
+            try {
+                if (data.category) {
+                    const cats = Array.isArray(data.category) ? data.category : [data.category];
+                    cats.forEach(c => {
+                        if (typeof c === 'string') {
+                            const text = c.trim();
+                            document.querySelectorAll('.category-nav li').forEach(li => {
+                                if (li.innerText === text) {
+                                    if (!li.classList.contains('active')) {
+                                        li.classList.add('related');
+                                    }
+                                }
+                            });
+                        }
+                    });
+                }
+            } catch (e) {
+                console.error('Highlight error', e);
+            }
+
+            // 5. Update Detail View
+            previewImg.style.display = 'none';
+            detailArea.style.display = 'block';
+            previewContainer.style.opacity = '1';
+
+            detailTitle.innerText = data.title;
+
+            // メディア表示（YouTube優先、なければSoundCloud）
+            mediaContainer.innerHTML = '';
+            if (data.youtubeId) {
+                mediaContainer.innerHTML = `<iframe width="100%" height="250" src="https://www.youtube.com/embed/${data.youtubeId}" frameborder="0" allowfullscreen></iframe>`;
+            } else if (data.soundcloudUrl) {
+                const scUrl = encodeURIComponent(data.soundcloudUrl);
+                mediaContainer.innerHTML = `<iframe width="100%" height="166" scrolling="no" frameborder="no" allow="autoplay" src="https://w.soundcloud.com/player/?url=${scUrl}&color=%23ff5500&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true"></iframe>`;
+            }
+
+            detailDesc.innerText = data.description || '';
+
+            // Handle Link
+            detailLink.innerHTML = '';
+            if (data.link) {
+                const linkTitle = data['link title'] || data.link;
+                const linkEl = document.createElement('a');
+                linkEl.href = data.link;
+                linkEl.target = "_blank";
+                linkEl.innerText = linkTitle;
+                detailLink.appendChild(linkEl);
+                detailLink.style.display = 'block';
+            } else {
+                detailLink.style.display = 'none';
+            }
+
+            const releaseDate = data['release date'] ? data['release date'] + '\n\n' : '';
+            const credits = data.credits || '';
+            detailCredits.innerText = releaseDate + credits;
+            detailCredits.style.display = (releaseDate || credits) ? 'block' : 'none';
+
+            detailExtraImages.innerHTML = '';
+            if (data.extraImages && data.extraImages.length > 0) {
+                data.extraImages.forEach(src => {
+                    const img = document.createElement('img');
+                    img.src = src;
+                    img.style.width = '100%';
+                    img.style.marginBottom = '1rem';
+                    detailExtraImages.appendChild(img);
+                });
+            }
+        }
+
+        function showInfoPage(type, element) {
+            // Clear any active work item but DO NOT call resetView() fully 
+            // because resetView() hides detailArea which we want to show, 
+            // and we don't want to clear category selection.
+            if (currentActiveItem) {
+                currentActiveItem = null;
+                document.querySelectorAll('.work-item').forEach(el => {
+                    el.classList.remove('active', 'is-disabled');
+                });
+            }
+            // Unlock center column scrolling
+            document.querySelector('.column.center').style.overflowY = 'auto';
+
+            // Clear other secondary nav items (if any in future)
+            document.querySelectorAll('.secondary-nav li').forEach(li => li.classList.remove('active'));
+            // Clear all 'related' highlights from categories
+            document.querySelectorAll('.category-nav li').forEach(li => li.classList.remove('related'));
+
+            element.classList.add('active');
+
+            // detailAreaを表示
+            previewImg.style.display = 'none';
+            detailArea.style.display = 'block';
+            previewContainer.style.opacity = '1';
+
+            const data = infoData[type];
+            detailTitle.innerText = data.title;
+            detailDesc.innerText = data.description;
+
+            // 画像があれば表示
+            if (data.image) {
+                previewImg.src = data.image;
+                previewImg.style.display = 'block';
+            }
+
+            // 不要な要素をクリア
+            mediaContainer.innerHTML = '';
+            detailLink.innerHTML = '';
+            detailLink.style.display = 'none';
+            detailCredits.innerText = '';
+            detailCredits.style.display = 'none';
+            detailExtraImages.innerHTML = '';
+        }
+
+        // 【5】リセット関数（1つに統合しました）
+        function resetView() {
+            // Unlock center column scrolling
+            document.querySelector('.column.center').style.overflowY = 'auto';
+            currentActiveItem = null;
+            currentActiveTitle = null;
+            detailArea.style.display = 'none';
+            previewContainer.style.opacity = '0';
+            mediaContainer.innerHTML = '';
+            detailExtraImages.innerHTML = '';
+            document.querySelectorAll('.work-item').forEach(el => {
+                el.classList.remove('active', 'is-disabled');
+            });
+            // Clear related highlights
+            document.querySelectorAll('.category-nav li').forEach(li => li.classList.remove('related'));
+            // Clear secondary nav active state
+            document.querySelectorAll('.secondary-nav li').forEach(li => li.classList.remove('active'));
+        }
+
+        // カテゴリー切り替え
+        // カテゴリー切り替え
+        function filterWorks(cat, element) {
+            // Toggle logic: If clicking the active category (and it's not 'all'), revert to 'all'
+            if (element && element.classList.contains('active') && cat !== 'all') {
+                const allCatBtn = document.getElementById('cat-all');
+                filterWorks('all', allCatBtn);
+                return;
+            }
+
+            // Check if "About" is active
+            const isAboutActive = document.querySelector('.secondary-nav li.active');
+
+            if (!isAboutActive) {
+                resetView();
+            } else {
+                // If About is active, we don't want to hide the detail area (resetView does that).
+                // But we should ensure other states are clean.
+                currentActiveItem = null;
+                currentActiveTitle = null;
+                // Clear related highlights
+                document.querySelectorAll('.category-nav li').forEach(li => li.classList.remove('related'));
+            }
+
+            document.querySelectorAll('.category-nav li').forEach(li => {
+                li.classList.remove('active');
+            });
+
+            if (element) {
+                element.classList.add('active');
+            } else {
+                const allCat = document.getElementById('cat-all');
+                if (allCat) allCat.classList.add('active');
+            }
+            displayWorks(cat);
+        }
+
+        // 初期起動
+        displayWorks('all');
+
+        // Fetch Data from GAS
+        // Fetch Data from GAS
+        async function fetchWorks() {
+            // 1. Try to load from cache first
+            const cached = localStorage.getItem('works_cache');
+            if (cached) {
+                try {
+                    const parsed = JSON.parse(cached);
+                    if (Array.isArray(parsed) && parsed.length > 0) {
+                        console.log('Loaded from cache');
+                        works = parsed;
+                        const activeCat = document.querySelector('.category-nav li.active');
+                        const filter = activeCat ? (activeCat.id === 'cat-all' ? 'all' : activeCat.innerText) : 'all';
+                        displayWorks(filter);
+                    }
+                } catch (e) {
+                    console.error('Cache parse error', e);
+                }
+            }
+
+            if (!GAS_API_URL) return;
+
+            // 2. Fetch fresh data
+            try {
+                const response = await fetch(GAS_API_URL);
+                const data = await response.json();
+                if (Array.isArray(data) && data.length > 0) {
+                    console.log('Loaded from Network');
+                    // Filter out empty rows (where title is missing)
+                    works = data.filter(w => w.title && w.title.trim() !== '');
+
+                    // Save to cache
+                    localStorage.setItem('works_cache', JSON.stringify(works));
+
+                    // Re-apply current filter
+                    const activeCat = document.querySelector('.category-nav li.active');
+                    const filter = activeCat ? (activeCat.id === 'cat-all' ? 'all' : activeCat.innerText) : 'all';
+                    displayWorks(filter);
+                }
+            } catch (error) {
+                console.error('Failed to fetch works:', error);
+            }
+        }
+
+
+        fetchWorks();
+
+        // Scroll Synchronization
+        const centerColumn = document.querySelector('.column.center');
+        const leftColumn = document.querySelector('.column.left');
+        const rightColumn = document.querySelector('.column.right');
+
+        function syncScroll(e) {
+            const isAboutActive = document.querySelector('.secondary-nav li.active');
+            const isLeft = e.currentTarget.classList.contains('left');
+
+            // 1. Work Item Selected (Center Locked)
+            if (currentActiveItem) {
+                e.preventDefault();
+                rightColumn.scrollTop += e.deltaY;
+            }
+            // 2. About Section Active
+            else if (isAboutActive) {
+                // Only sync left column scroll to right
+                if (isLeft) {
+                    e.preventDefault();
+                    rightColumn.scrollTop += e.deltaY;
+                }
+                // (Center column continues to scroll naturally)
+            }
+        }
+
+        centerColumn.addEventListener('wheel', syncScroll, { passive: false });
+        leftColumn.addEventListener('wheel', syncScroll, { passive: false });
+    </script>
+</body>
+
+</html>
