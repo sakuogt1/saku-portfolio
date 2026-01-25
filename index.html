@@ -77,8 +77,8 @@
     </div>
 
     <script>
-        // 【1】作品データ（カンマ等のミスを修正しました）
-        const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbz4WHpFwnlDnOdw7FjJAKkGLH5nsSYt2lcUeK1MGOWP2GUxLiHou0Fdpyev7lnWeW0Q/exec';
+        // 【1】作品データ
+        const GAS_API_URL = 'API_KEY';
 
         // Data will be fetched from GAS. Initialized as empty.
         let works = [];
@@ -328,7 +328,6 @@
         }
 
         // カテゴリー切り替え
-        // カテゴリー切り替え
         function filterWorks(cat, element) {
             // Toggle logic: If clicking the active category (and it's not 'all'), revert to 'all'
             if (element && element.classList.contains('active') && cat !== 'all') {
@@ -367,7 +366,6 @@
         // 初期起動
         displayWorks('all');
 
-        // Fetch Data from GAS
         // Fetch Data from GAS
         async function fetchWorks() {
             // 1. Try to load from cache first
@@ -410,7 +408,6 @@
                 console.error('Failed to fetch works:', error);
             }
         }
-
 
         fetchWorks();
 
