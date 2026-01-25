@@ -22,15 +22,20 @@
                 </h1>
                 <nav class="category-nav">
                     <ul>
-                        <li id="cat-all" class="active" onclick="filterWorks('all', this)"><span>all</span></li>
-                        <li onclick="filterWorks('client works', this)"><span>client works</span></li>
-                        <li onclick="filterWorks('personal works', this)"><span>personal works</span></li>
-                        <li onclick="filterWorks('original', this)"><span>original</span></li>
-                        <li onclick="filterWorks('collaborate', this)"><span>collaborate</span></li>
-                        <li onclick="filterWorks('remix', this)"><span>remix</span></li>
-                        <li onclick="filterWorks('live', this)"><span>live/event</span></li>
-                        <li onclick="filterWorks('exhibition', this)"><span>exhibition</span></li>
-                        <li onclick="filterWorks('award', this)"><span>award</span></li>
+                        <li id="cat-all" class="active" data-cat="all" onclick="filterWorks('all', this)">
+                            <span>all</span>
+                        </li>
+                        <li data-cat="client works" onclick="filterWorks('client works', this)"><span>client
+                                works</span></li>
+                        <li data-cat="personal works" onclick="filterWorks('personal works', this)"><span>personal
+                                works</span></li>
+                        <li data-cat="original" onclick="filterWorks('original', this)"><span>original</span></li>
+                        <li data-cat="collaborate" onclick="filterWorks('collaborate', this)"><span>collaborate</span>
+                        </li>
+                        <li data-cat="remix" onclick="filterWorks('remix', this)"><span>remix</span></li>
+                        <li data-cat="live" onclick="filterWorks('live', this)"><span>live/event</span></li>
+                        <li data-cat="exhibition" onclick="filterWorks('exhibition', this)"><span>exhibition</span></li>
+                        <li data-cat="award" onclick="filterWorks('award', this)"><span>award</span></li>
                     </ul>
                 </nav>
                 <nav class="secondary-nav" style="margin-top: 3rem;">
@@ -194,8 +199,10 @@
                     cats.forEach(c => {
                         if (typeof c === 'string') {
                             const text = c.trim();
+
                             document.querySelectorAll('.category-nav li').forEach(li => {
-                                if (li.innerText === text) {
+                                // Match using data-cat instead of innerText for robust matching
+                                if (li.dataset.cat === text) {
                                     if (!li.classList.contains('active')) {
                                         li.classList.add('related');
                                     }
@@ -377,7 +384,7 @@
                         console.log('Loaded from cache');
                         works = parsed;
                         const activeCat = document.querySelector('.category-nav li.active');
-                        const filter = activeCat ? (activeCat.id === 'cat-all' ? 'all' : activeCat.innerText) : 'all';
+                        const filter = activeCat ? (activeCat.dataset.cat || 'all') : 'all';
                         displayWorks(filter);
                     }
                 } catch (e) {
@@ -401,7 +408,7 @@
 
                     // Re-apply current filter
                     const activeCat = document.querySelector('.category-nav li.active');
-                    const filter = activeCat ? (activeCat.id === 'cat-all' ? 'all' : activeCat.innerText) : 'all';
+                    const filter = activeCat ? (activeCat.dataset.cat || 'all') : 'all';
                     displayWorks(filter);
                 }
             } catch (error) {
