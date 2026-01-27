@@ -247,10 +247,21 @@
                 detailLink.style.display = 'none';
             }
 
-            const releaseDate = data['release date'] ? data['release date'] + '\n\n' : '';
-            const credits = data.credits || '';
-            detailCredits.innerText = releaseDate + credits;
-            detailCredits.style.display = (releaseDate || credits) ? 'block' : 'none';
+            detailCredits.innerHTML = '';
+            if (data['release date']) {
+                const dateDiv = document.createElement('div');
+                dateDiv.innerText = data['release date'];
+                if (data.credits) {
+                    dateDiv.style.marginBottom = '0.4rem';
+                }
+                detailCredits.appendChild(dateDiv);
+            }
+            if (data.credits) {
+                const creditDiv = document.createElement('div');
+                creditDiv.innerText = data.credits;
+                detailCredits.appendChild(creditDiv);
+            }
+            detailCredits.style.display = (data['release date'] || data.credits) ? 'block' : 'none';
 
             detailExtraImages.innerHTML = '';
             if (data.extraImages && data.extraImages.length > 0) {
