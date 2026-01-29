@@ -165,7 +165,8 @@ body {
 }
 
 .work-item:hover {
-    border-bottom: 0.5px solid #333;
+    color: #bbb;
+    border-bottom: 1px solid #bbb;
 }
 
 /* プレビュー画像 */
@@ -229,12 +230,13 @@ body {
 /* 選択中の作品 */
 .work-item.active {
     opacity: 1;
+    color: #333;
     border-bottom: 1.1px solid #333;
 }
 
 /* 基本スタイルにアニメーションを追加 */
 .work-item {
-    transition: opacity 0.1s ease, border-bottom 0.2s ease;
+    transition: opacity 0.1s ease;
 }
 
 #detail-credits {
