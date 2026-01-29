@@ -162,11 +162,14 @@ body {
     line-height: 1.5;
     margin-bottom: 0.18rem;
     cursor: pointer;
+    border-bottom: 1.1px solid transparent;
+    /* Reserve space */
+    transition: opacity 0.1s ease;
 }
 
 .work-item:hover {
     color: #bbb;
-    border-bottom: 1px solid #bbb;
+    border-bottom: 1.1px solid #bbb;
 }
 
 /* プレビュー画像 */
@@ -235,9 +238,7 @@ body {
 }
 
 /* 基本スタイルにアニメーションを追加 */
-.work-item {
-    transition: opacity 0.1s ease;
-}
+
 
 #detail-credits {
     white-space: pre-wrap;
