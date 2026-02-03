@@ -16,7 +16,9 @@ def process_image(input_path, output_folder):
             output_path = os.path.join(output_folder, f"{base_name}.webp")
             
             # 3. WebPとして保存
-            img.save(output_path, "WEBP")
+            # quality=80: 画質とサイズのバランスが良い
+            # method=6: 圧縮効率を最大化（処理時間は少し増えるがファイルサイズは小さくなる）
+            img.save(output_path, "WEBP", quality=80, method=6)
             print(f"Success: {output_path}")
             
     except Exception as e:

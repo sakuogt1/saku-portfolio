@@ -111,6 +111,24 @@
         const detailCredits = document.getElementById('detail-credits');
         const detailExtraImages = document.getElementById('detail-extra-images');
 
+        // Helper: Preload images
+        function preloadImages(works) {
+            console.log('Preloading images...');
+            works.forEach(work => {
+                if (work.image) {
+                    const img = new Image();
+                    img.src = work.image;
+                }
+            });
+            // Preload info images
+            Object.values(infoData).forEach(info => {
+                if (info.image) {
+                    const img = new Image();
+                    img.src = info.image;
+                }
+            });
+        }
+
         // 【3】表示関数
         function displayWorks(filter) {
             workList.innerHTML = '';
@@ -397,6 +415,8 @@
                         const activeCat = document.querySelector('.category-nav li.active');
                         const filter = activeCat ? (activeCat.dataset.cat || 'all') : 'all';
                         displayWorks(filter);
+                        // Start preloading (deferred slightly or immediate)
+                        setTimeout(() => preloadImages(works), 100);
                     }
                 } catch (e) {
                     console.error('Cache parse error', e);
@@ -421,6 +441,9 @@
                     const activeCat = document.querySelector('.category-nav li.active');
                     const filter = activeCat ? (activeCat.dataset.cat || 'all') : 'all';
                     displayWorks(filter);
+
+                    // Start preloading
+                    preloadImages(works);
                 }
             } catch (error) {
                 console.error('Failed to fetch works:', error);
