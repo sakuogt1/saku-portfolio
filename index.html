@@ -17,7 +17,7 @@
     <div class="container">
         <header class="column left">
             <div class="nav-content">
-                <h1 class="my-name" onclick="filterWorks('all', null);" style="cursor:pointer;">
+                <h1 class="my-name" onclick="onLogoClick();" style="cursor:pointer;">
                     Saku
                 </h1>
                 <nav class="category-nav">
@@ -40,7 +40,7 @@
                 </nav>
                 <nav class="secondary-nav" style="margin-top: 3rem;">
                     <ul>
-                        <li onclick="showInfoPage('about', this)"><span>about</span></li>
+                        <li id="nav-about" onclick="showInfoPage('about', this)"><span>about</span></li>
                     </ul>
                 </nav>
             </div>
@@ -397,6 +397,19 @@
                 if (allCat) allCat.classList.add('active');
             }
             displayWorks(cat);
+        }
+
+        function onLogoClick() {
+            // 1. Set filter to 'all'
+            // We can reuse filterWorks('all', element) but we need to pass the 'all' element to update UI state
+            const allCatBtn = document.getElementById('cat-all');
+            filterWorks('all', allCatBtn);
+
+            // 2. Show 'about' page
+            const aboutBtn = document.getElementById('nav-about');
+            if (aboutBtn) {
+                showInfoPage('about', aboutBtn);
+            }
         }
 
         // 初期起動
