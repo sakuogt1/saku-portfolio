@@ -145,6 +145,10 @@ body {
     border-bottom: 1px solid #bbb;
 }
 
+#nav-storage {
+    color: #848484;
+}
+
 /* 中央カラムの設定 */
 .column.center {
     width: 40%;
