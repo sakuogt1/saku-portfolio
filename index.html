@@ -148,6 +148,20 @@
                 item.className = 'work-item';
                 item.innerText = work.title;
 
+                // 未来の予定判定
+                if (work['release date']) {
+                    const dateStr = work['release date'].toString().replace(/\./g, '/');
+                    const releaseDate = new Date(dateStr);
+                    // 本日より未来の予定かチェック
+                    // 比較を簡単にするため、今日の0時0分を取得
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    if (!isNaN(releaseDate) && releaseDate > today) {
+                        item.classList.add('future-schedule');
+                        work.isFuture = true;
+                    }
+                }
+
                 // Restore persistent state
                 if (currentActiveTitle) {
                     if (work.title === currentActiveTitle) {
@@ -273,6 +287,9 @@
             if (data['release date']) {
                 const dateDiv = document.createElement('div');
                 dateDiv.innerText = data['release date'];
+                if (data.isFuture) {
+                    dateDiv.classList.add('future-schedule-text');
+                }
                 if (data.credits) {
                     dateDiv.style.marginBottom = '0.4rem';
                 }

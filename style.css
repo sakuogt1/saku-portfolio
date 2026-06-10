@@ -241,6 +241,25 @@ body {
     border-bottom: 1.1px solid #333;
 }
 
+/* 未来の予定（少し水色） */
+.work-item.future-schedule {
+    color: #6495ed;
+}
+
+.work-item.future-schedule:hover {
+    color: #8bb1f2;
+    border-bottom: 1.1px solid #8bb1f2;
+}
+
+.work-item.future-schedule.active {
+    color: #4169e1;
+    border-bottom: 1.1px solid #4169e1;
+}
+
+.future-schedule-text {
+    color: #6495ed !important;
+}
+
 /* 基本スタイルにアニメーションを追加 */
 
 
