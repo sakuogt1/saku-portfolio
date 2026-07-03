@@ -73,6 +73,23 @@ body {
     border-bottom: 1px solid #333;
 }
 
+.sns-links a.highlight-youtube {
+    color: #1a1a1a;
+}
+
+.sns-links a.highlight-youtube .sns-icon {
+    fill: #ff0000;
+}
+
+.sns-links a.highlight-soundcloud {
+    color: #1a1a1a;
+}
+
+.sns-links a.highlight-soundcloud .sns-icon {
+    fill: #ff5500;
+    stroke: #ff5500;
+}
+
 .center {
     width: 30%;
     overflow-y: auto;
