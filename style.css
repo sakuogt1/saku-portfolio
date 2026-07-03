@@ -73,12 +73,29 @@ body {
     border-bottom: 1px solid #333;
 }
 
+.sns-links a.sns-instagram:hover .sns-icon {
+    fill: url(#instagram-grad);
+}
+
+.sns-links a.sns-youtube:hover .sns-icon {
+    fill: #e00400;
+}
+
+.sns-links a.sns-soundcloud:hover .sns-icon {
+    fill: #f05000;
+    stroke: #f05000;
+}
+
+.sns-links a.sns-bandcamp:hover .sns-icon {
+    fill: #629aa9;
+}
+
 .sns-links a.highlight-youtube {
     color: #1a1a1a;
 }
 
 .sns-links a.highlight-youtube .sns-icon {
-    fill: #ff0000;
+    fill: #e00400;
 }
 
 .sns-links a.highlight-soundcloud {
@@ -86,8 +103,16 @@ body {
 }
 
 .sns-links a.highlight-soundcloud .sns-icon {
-    fill: #ff5500;
-    stroke: #ff5500;
+    fill: #f05000;
+    stroke: #f05000;
+}
+
+.sns-links a.highlight-bandcamp {
+    color: #1a1a1a;
+}
+
+.sns-links a.highlight-bandcamp .sns-icon {
+    fill: #629aa9;
 }
 
 .center {
