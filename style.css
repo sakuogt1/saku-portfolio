@@ -143,7 +143,7 @@ body {
     cursor: pointer;
     margin-bottom: 6px;
     font-size: 0.9rem;
-    color: #bbb;
+    color: #848484;
     clear: both;
     display: block;
     width: 100%;
@@ -158,8 +158,8 @@ body {
 
 /* ホバーした時：色は変えず、アンダーバーだけ出す */
 .category-nav li:hover span {
-    color: #bbb;
-    border-bottom: 1px solid #bbb;
+    color: #a2a2a2;
+    border-bottom: 1px solid #a2a2a2;
 }
 
 /* 選択中（クリック後）の状態：ここだけ真っ黒にする */
@@ -193,12 +193,12 @@ body {
 }
 
 .secondary-nav li:hover span {
-    color: #bbb;
-    border-bottom: 1px solid #bbb;
+    color: #a2a2a2;
+    border-bottom: 1px solid #a2a2a2;
 }
 
 #nav-storage {
-    color: #848484;
+    color: #606060;
 }
 
 /* 中央カラムの設定 */
