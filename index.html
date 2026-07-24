@@ -45,6 +45,8 @@
 </head>
 
 <body>
+    <svg id="connection-lines"
+        style="position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 999;"></svg>
     <div class="container">
         <header class="column left">
             <div class="nav-content">
@@ -342,6 +344,9 @@
                 console.error('Highlight error', e);
             }
 
+            // Draw connection lines between genre tags and selected work item
+            drawConnectionLines(element);
+
             // 5. Update Detail View
             previewImg.style.display = 'none';
             detailArea.style.display = 'block';
@@ -405,7 +410,97 @@
             }
         }
 
+        // Connection Lines Drawing Helper
+        function clearConnectionLines() {
+            const svg = document.getElementById('connection-lines');
+            if (svg) svg.innerHTML = '';
+        }
+
+        function drawConnectionLines(activeWorkItem) {
+            clearConnectionLines();
+            if (!activeWorkItem) return;
+
+            // Do not draw lines on mobile screen widths (e.g. <= 768px) where layout stacks
+            if (window.innerWidth <= 768) return;
+
+            const svg = document.getElementById('connection-lines');
+            if (!svg) return;
+
+            const workRect = activeWorkItem.getBoundingClientRect();
+            const padding = 12;
+
+            // Target point (left edge of active work title)
+            const targetX = workRect.left - padding;
+            const targetY = workRect.top + (workRect.height / 2);
+
+            // Active category line (black)
+            const activeLi = document.querySelector('.category-nav li.active');
+            if (activeLi && activeLi.id !== 'cat-all') {
+                const span = activeLi.querySelector('span') || activeLi;
+                const rect = span.getBoundingClientRect();
+
+                const textRightX = rect.right;
+                const textRightY = rect.top + (rect.height / 2);
+
+                const aimX = textRightX + 10;
+                const aimY = textRightY;
+
+                const dx = targetX - aimX;
+                const dy = targetY - aimY;
+                const len = Math.hypot(dx, dy);
+
+                if (len > 0) {
+                    const x1 = textRightX + (dx / len) * padding;
+                    const y1 = textRightY + (dy / len) * padding;
+
+                    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                    line.setAttribute('x1', x1);
+                    line.setAttribute('y1', y1);
+                    line.setAttribute('x2', targetX);
+                    line.setAttribute('y2', targetY);
+                    line.setAttribute('stroke', '#000000');
+                    line.setAttribute('stroke-width', '1');
+                    line.setAttribute('stroke-opacity', '0.17');
+                    svg.appendChild(line);
+                }
+            }
+
+            // Related categories lines (blue)
+            const relatedLis = document.querySelectorAll('.category-nav li.related');
+            relatedLis.forEach(li => {
+                if (li.id === 'cat-all') return;
+                const span = li.querySelector('span') || li;
+                const rect = span.getBoundingClientRect();
+
+                const textRightX = rect.right;
+                const textRightY = rect.top + (rect.height / 2);
+
+                const aimX = textRightX + 10;
+                const aimY = textRightY;
+
+                const dx = targetX - aimX;
+                const dy = targetY - aimY;
+                const len = Math.hypot(dx, dy);
+
+                if (len > 0) {
+                    const x1 = textRightX + (dx / len) * padding;
+                    const y1 = textRightY + (dy / len) * padding;
+
+                    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                    line.setAttribute('x1', x1);
+                    line.setAttribute('y1', y1);
+                    line.setAttribute('x2', targetX);
+                    line.setAttribute('y2', targetY);
+                    line.setAttribute('stroke', '#4747ff');
+                    line.setAttribute('stroke-width', '1');
+                    line.setAttribute('stroke-opacity', '0.25');
+                    svg.appendChild(line);
+                }
+            });
+        }
+
         function showInfoPage(type, element) {
+            clearConnectionLines();
             // Clear any active work item but DO NOT call resetView() fully 
             // because resetView() hides detailArea which we want to show, 
             // and we don't want to clear category selection.
@@ -462,6 +557,7 @@
 
         // 【5】リセット関数（1つに統合しました）
         function resetView() {
+            clearConnectionLines();
             // Unlock center column scrolling
             document.querySelector('.column.center').style.overflowY = 'auto';
 
@@ -620,6 +716,23 @@
 
         centerColumn.addEventListener('wheel', syncScroll, { passive: false });
         leftColumn.addEventListener('wheel', syncScroll, { passive: false });
+
+        window.addEventListener('resize', () => {
+            if (currentActiveItem) {
+                drawConnectionLines(currentActiveItem);
+            }
+        });
+
+        centerColumn.addEventListener('scroll', () => {
+            if (currentActiveItem) {
+                drawConnectionLines(currentActiveItem);
+            }
+        });
+        leftColumn.addEventListener('scroll', () => {
+            if (currentActiveItem) {
+                drawConnectionLines(currentActiveItem);
+            }
+        });
     </script>
 </body>
 

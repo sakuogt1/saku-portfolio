@@ -171,7 +171,7 @@ body {
 
 /* 関連カテゴリ（選択された作品に関連するもの） */
 .category-nav li.related {
-    color: #0000ff;
+    color: #4747ff;
 }
 
 /* Secondary Nav Styling (Same as category nav) */
