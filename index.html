@@ -252,11 +252,15 @@
 
                     // Clear about/secondary nav active state when hovering works
                     document.querySelectorAll('.secondary-nav li').forEach(li => li.classList.remove('active'));
+
+                    // Draw connection line if selected category is not 'all'
+                    drawConnectionLines(item);
                 };
 
                 item.onmouseleave = () => {
                     if (currentActiveItem) return;
                     previewContainer.style.opacity = '0';
+                    clearConnectionLines();
                 };
 
                 item.onclick = () => {
