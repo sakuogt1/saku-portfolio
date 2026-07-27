@@ -490,3 +490,51 @@ body {
         /* Add some top padding for back button */
     }
 }
+
+/* Mobile Undo / Redo Navigation Bar */
+#mobile-undo-redo {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    #mobile-undo-redo {
+        display: flex;
+        position: fixed;
+        left: 20px;
+        bottom: 20px;
+        z-index: 9999;
+        gap: 8px;
+        align-items: center;
+    }
+
+    #mobile-undo-redo button {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background-color: rgba(255, 255, 255, 0.9);
+        border: 1px solid #ccc;
+        color: #333;
+        font-size: 0.9rem;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        cursor: pointer;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+        transition: opacity 0.2s ease, background-color 0.2s ease;
+        padding: 0;
+        line-height: 1;
+    }
+
+    #mobile-undo-redo button span {
+        display: block;
+        transform: translateY(-0.5px);
+    }
+
+    #mobile-undo-redo button:disabled {
+        opacity: 0.3;
+        cursor: not-allowed;
+        box-shadow: none;
+    }
+}

@@ -148,12 +148,19 @@
 
                     <p id="detail-description"></p>
                     <div id="detail-link" style="display: none;"></div>
+                    <div id="detail-tags" style="display: none;"></div>
                     <div id="detail-credits"></div>
 
                     <div id="detail-extra-images"></div>
                 </div>
             </div>
         </aside>
+    </div>
+
+    <!-- Mobile Undo/Redo Navigation Bar -->
+    <div id="mobile-undo-redo">
+        <button id="mobile-undo-btn" onclick="undoState()" disabled><span>&lt;</span></button>
+        <button id="mobile-redo-btn" onclick="redoState()" disabled><span>&gt;</span></button>
     </div>
 
     <script>
@@ -175,6 +182,115 @@
         let currentActiveItem = null;
         let currentActiveTitle = null;
 
+        // Undo / Redo History state management
+        const historyStack = [];
+        let historyIndex = -1;
+        let isPerformingHistoryAction = false;
+
+        function getCurrentState() {
+            const activeCatEl = document.querySelector('.category-nav li.active');
+            const activeCat = activeCatEl ? (activeCatEl.dataset.cat || 'all') : 'all';
+
+            let viewType = 'list'; // 'list', 'work', 'info'
+            let detailId = null;
+
+            if (currentActiveTitle) {
+                viewType = 'work';
+                detailId = currentActiveTitle;
+            } else {
+                const activeSecondary = document.querySelector('.secondary-nav li.active');
+                if (activeSecondary && activeSecondary.id === 'nav-about') {
+                    viewType = 'info';
+                    detailId = 'about';
+                }
+            }
+
+            return {
+                category: activeCat,
+                viewType: viewType,
+                detailId: detailId
+            };
+        }
+
+        function updateUndoRedoButtons() {
+            const undoBtn = document.getElementById('mobile-undo-btn');
+            const redoBtn = document.getElementById('mobile-redo-btn');
+            if (undoBtn) undoBtn.disabled = historyIndex <= 0;
+            if (redoBtn) redoBtn.disabled = historyIndex >= historyStack.length - 1;
+        }
+
+        function pushState() {
+            if (isPerformingHistoryAction) return;
+            const newState = getCurrentState();
+            
+            // Avoid duplicate contiguous states
+            if (historyIndex >= 0) {
+                const curState = historyStack[historyIndex];
+                if (curState.category === newState.category &&
+                    curState.viewType === newState.viewType &&
+                    curState.detailId === newState.detailId) {
+                    return;
+                }
+            }
+
+            // Truncate future history if we were in the middle of history
+            historyStack.splice(historyIndex + 1);
+            historyStack.push(newState);
+            historyIndex = historyStack.length - 1;
+            updateUndoRedoButtons();
+        }
+
+        function applyState(state) {
+            isPerformingHistoryAction = true;
+            try {
+                // 1. Apply category filter if changed or needed
+                const activeCatEl = document.querySelector('.category-nav li.active');
+                const curCat = activeCatEl ? (activeCatEl.dataset.cat || 'all') : 'all';
+                if (curCat !== state.category) {
+                    const targetCatLi = document.querySelector(`.category-nav li[data-cat="${state.category}"]`);
+                    filterWorksInternal(state.category, targetCatLi);
+                }
+
+                // 2. Apply view state
+                if (state.viewType === 'list') {
+                    resetViewInternal();
+                } else if (state.viewType === 'work') {
+                    const workObj = works.find(w => w.title === state.detailId);
+                    if (workObj) {
+                        const allItems = Array.from(workList.children);
+                        const targetItem = allItems.find(el => el.innerText === workObj.title);
+                        selectWorkInternal(targetItem, workObj);
+                    } else {
+                        resetViewInternal();
+                    }
+                } else if (state.viewType === 'info') {
+                    const targetNav = document.getElementById(`nav-${state.detailId}`);
+                    if (targetNav) {
+                        showInfoPageInternal(state.detailId, targetNav);
+                    } else {
+                        resetViewInternal();
+                    }
+                }
+            } finally {
+                isPerformingHistoryAction = false;
+                updateUndoRedoButtons();
+            }
+        }
+
+        function undoState() {
+            if (historyIndex > 0) {
+                historyIndex--;
+                applyState(historyStack[historyIndex]);
+            }
+        }
+
+        function redoState() {
+            if (historyIndex < historyStack.length - 1) {
+                historyIndex++;
+                applyState(historyStack[historyIndex]);
+            }
+        }
+
         const workList = document.getElementById('work-list');
         const previewImg = document.getElementById('preview-image');
         const previewContainer = document.getElementById('preview-container');
@@ -182,6 +298,7 @@
         const detailTitle = document.getElementById('detail-title');
         const detailDesc = document.getElementById('detail-description');
         const detailLink = document.getElementById('detail-link');
+        const detailTags = document.getElementById('detail-tags');
         const mediaContainer = document.getElementById('youtube-embed');
         const detailCredits = document.getElementById('detail-credits');
         const detailExtraImages = document.getElementById('detail-extra-images');
@@ -275,9 +392,9 @@
         }
 
         // 【4】選択（ロック）状態にする関数
-        function selectWork(element, data) {
+        function selectWorkInternal(element, data) {
             currentActiveItem = element;
-            currentActiveTitle = data.title;
+            currentActiveTitle = data ? data.title : null;
             // Lock center column scrolling
             document.querySelector('.column.center').style.overflowY = 'hidden';
 
@@ -288,6 +405,8 @@
             if (snsYoutube) snsYoutube.classList.remove('highlight-youtube');
             if (snsSoundcloud) snsSoundcloud.classList.remove('highlight-soundcloud');
             if (snsBandcamp) snsBandcamp.classList.remove('highlight-bandcamp');
+
+            if (!data) return;
 
             const hasYoutube = !!data.youtubeId;
             const hasSoundcloud = !!data.soundcloudUrl;
@@ -307,7 +426,6 @@
             document.body.classList.add('mobile-detail-open');
 
             // 1. Toggle visibility (Transparency) FIRST to ensure UI feedback
-            // Use workList.children for more robust selection
             const allItems = Array.from(workList.children);
             allItems.forEach(el => {
                 if (el === element) {
@@ -334,7 +452,6 @@
                             const text = c.trim();
 
                             document.querySelectorAll('.category-nav li').forEach(li => {
-                                // Match using data-cat instead of innerText for robust matching
                                 if (li.dataset.cat === text) {
                                     if (!li.classList.contains('active')) {
                                         li.classList.add('related');
@@ -358,7 +475,7 @@
 
             detailTitle.innerText = data.title;
 
-            // メディア表示（YouTube優先、なければSoundCloud）
+            // メディア表示
             mediaContainer.innerHTML = '';
             if (data.youtubeId) {
                 mediaContainer.innerHTML = `<iframe width="100%" height="250" src="https://www.youtube.com/embed/${data.youtubeId}" frameborder="0" allowfullscreen></iframe>`;
@@ -383,24 +500,56 @@
                 detailLink.style.display = 'none';
             }
 
+            // Handle Tags (Between link and release date, clickable, styled with text underline, no # or commas)
+            detailTags.innerHTML = '';
+            if (data.category) {
+                const cats = Array.isArray(data.category) ? data.category : [data.category];
+                detailTags.style.display = 'flex';
+                detailTags.style.flexWrap = 'wrap';
+                detailTags.style.gap = '8px';
+                detailTags.style.marginBottom = '1rem';
+                detailTags.style.fontSize = '0.8rem';
+                detailTags.style.color = '#666';
+
+                cats.forEach(c => {
+                    const cleanTag = c.trim();
+                    const span = document.createElement('span');
+                    span.innerText = cleanTag;
+                    span.style.textDecoration = 'underline';
+                    span.style.cursor = 'pointer';
+                    span.onclick = () => {
+                        const targetLi = document.querySelector(`.category-nav li[data-cat="${cleanTag}"]`);
+                        filterWorks(cleanTag, targetLi);
+                    };
+                    detailTags.appendChild(span);
+                });
+            } else {
+                detailTags.style.display = 'none';
+            }
+
             detailCredits.innerHTML = '';
-            if (data['release date']) {
-                const dateDiv = document.createElement('div');
-                dateDiv.innerText = data['release date'];
-                if (data.isFuture) {
-                    dateDiv.classList.add('future-schedule-text');
+            if (data['release date'] || data.credits) {
+                if (data['release date']) {
+                    const dateDiv = document.createElement('div');
+                    dateDiv.innerText = data['release date'];
+                    if (data.isFuture) {
+                        dateDiv.classList.add('future-schedule-text');
+                    }
+                    if (data.credits) {
+                        dateDiv.style.marginBottom = '0.4rem';
+                    }
+                    detailCredits.appendChild(dateDiv);
                 }
+
                 if (data.credits) {
-                    dateDiv.style.marginBottom = '0.4rem';
+                    const creditDiv = document.createElement('div');
+                    creditDiv.innerText = data.credits;
+                    detailCredits.appendChild(creditDiv);
                 }
-                detailCredits.appendChild(dateDiv);
+                detailCredits.style.display = 'block';
+            } else {
+                detailCredits.style.display = 'none';
             }
-            if (data.credits) {
-                const creditDiv = document.createElement('div');
-                creditDiv.innerText = data.credits;
-                detailCredits.appendChild(creditDiv);
-            }
-            detailCredits.style.display = (data['release date'] || data.credits) ? 'block' : 'none';
 
             detailExtraImages.innerHTML = '';
             if (data.extraImages && data.extraImages.length > 0) {
@@ -414,6 +563,11 @@
             }
         }
 
+        function selectWork(element, data) {
+            selectWorkInternal(element, data);
+            pushState();
+        }
+
         // Connection Lines Drawing Helper
         function clearConnectionLines() {
             const svg = document.getElementById('connection-lines');
@@ -424,7 +578,6 @@
             clearConnectionLines();
             if (!activeWorkItem) return;
 
-            // Do not draw lines on mobile screen widths (e.g. <= 768px) where layout stacks
             if (window.innerWidth <= 768) return;
 
             const svg = document.getElementById('connection-lines');
@@ -433,11 +586,9 @@
             const workRect = activeWorkItem.getBoundingClientRect();
             const padding = 12;
 
-            // Target point (left edge of active work title)
             const targetX = workRect.left - padding;
             const targetY = workRect.top + (workRect.height / 2);
 
-            // Active category line (black)
             const activeLi = document.querySelector('.category-nav li.active');
             if (activeLi && activeLi.id !== 'cat-all') {
                 const span = activeLi.querySelector('span') || activeLi;
@@ -469,7 +620,6 @@
                 }
             }
 
-            // Related categories lines (blue)
             const relatedLis = document.querySelectorAll('.category-nav li.related');
             relatedLis.forEach(li => {
                 if (li.id === 'cat-all') return;
@@ -503,11 +653,8 @@
             });
         }
 
-        function showInfoPage(type, element) {
+        function showInfoPageInternal(type, element) {
             clearConnectionLines();
-            // Clear any active work item but DO NOT call resetView() fully 
-            // because resetView() hides detailArea which we want to show, 
-            // and we don't want to clear category selection.
             if (currentActiveItem) {
                 currentActiveItem = null;
                 document.querySelectorAll('.work-item').forEach(el => {
@@ -515,27 +662,21 @@
                 });
             }
 
-            // Clear SNS highlights
             const snsYoutube = document.querySelector('.sns-youtube');
             const snsSoundcloud = document.querySelector('.sns-soundcloud');
             const snsBandcamp = document.querySelector('.sns-bandcamp');
             if (snsYoutube) snsYoutube.classList.remove('highlight-youtube');
             if (snsSoundcloud) snsSoundcloud.classList.remove('highlight-soundcloud');
             if (snsBandcamp) snsBandcamp.classList.remove('highlight-bandcamp');
-            // Unlock center column scrolling
-            document.querySelector('.column.center').style.overflowY = 'auto';
 
-            // Mobile: Add class to body
+            document.querySelector('.column.center').style.overflowY = 'auto';
             document.body.classList.add('mobile-detail-open');
 
-            // Clear other secondary nav items (if any in future)
             document.querySelectorAll('.secondary-nav li').forEach(li => li.classList.remove('active'));
-            // Clear all 'related' highlights from categories
             document.querySelectorAll('.category-nav li').forEach(li => li.classList.remove('related'));
 
             element.classList.add('active');
 
-            // detailAreaを表示
             previewImg.style.display = 'none';
             detailArea.style.display = 'block';
             previewContainer.style.opacity = '1';
@@ -544,28 +685,29 @@
             detailTitle.innerText = data.title;
             detailDesc.innerText = data.description;
 
-            // 画像があれば表示
             if (data.image) {
                 previewImg.src = data.image;
                 previewImg.style.display = 'block';
             }
 
-            // 不要な要素をクリア
             mediaContainer.innerHTML = '';
             detailLink.innerHTML = '';
             detailLink.style.display = 'none';
+            detailTags.innerHTML = '';
+            detailTags.style.display = 'none';
             detailCredits.innerText = '';
             detailCredits.style.display = 'none';
             detailExtraImages.innerHTML = '';
         }
 
-        // 【5】リセット関数（1つに統合しました）
-        function resetView() {
-            clearConnectionLines();
-            // Unlock center column scrolling
-            document.querySelector('.column.center').style.overflowY = 'auto';
+        function showInfoPage(type, element) {
+            showInfoPageInternal(type, element);
+            pushState();
+        }
 
-            // Mobile: Remove class from body
+        function resetViewInternal() {
+            clearConnectionLines();
+            document.querySelector('.column.center').style.overflowY = 'auto';
             document.body.classList.remove('mobile-detail-open');
 
             currentActiveItem = null;
@@ -573,16 +715,15 @@
             detailArea.style.display = 'none';
             previewContainer.style.opacity = '0';
             mediaContainer.innerHTML = '';
+            detailTags.innerHTML = '';
+            detailTags.style.display = 'none';
             detailExtraImages.innerHTML = '';
             document.querySelectorAll('.work-item').forEach(el => {
                 el.classList.remove('active', 'is-disabled');
             });
-            // Clear related highlights
             document.querySelectorAll('.category-nav li').forEach(li => li.classList.remove('related'));
-            // Clear secondary nav active state
             document.querySelectorAll('.secondary-nav li').forEach(li => li.classList.remove('active'));
 
-            // Clear SNS highlights
             const snsYoutube = document.querySelector('.sns-youtube');
             const snsSoundcloud = document.querySelector('.sns-soundcloud');
             const snsBandcamp = document.querySelector('.sns-bandcamp');
@@ -591,26 +732,19 @@
             if (snsBandcamp) snsBandcamp.classList.remove('highlight-bandcamp');
         }
 
-        // カテゴリー切り替え
-        function filterWorks(cat, element) {
-            // Toggle logic: If clicking the active category (and it's not 'all'), revert to 'all'
-            if (element && element.classList.contains('active') && cat !== 'all') {
-                const allCatBtn = document.getElementById('cat-all');
-                filterWorks('all', allCatBtn);
-                return;
-            }
+        function resetView() {
+            resetViewInternal();
+            pushState();
+        }
 
-            // Check if "About" is active
+        function filterWorksInternal(cat, element) {
             const isAboutActive = document.querySelector('.secondary-nav li.active');
 
             if (!isAboutActive) {
-                resetView();
+                resetViewInternal();
             } else {
-                // If About is active, we don't want to hide the detail area (resetView does that).
-                // But we should ensure other states are clean.
                 currentActiveItem = null;
                 currentActiveTitle = null;
-                // Clear related highlights
                 document.querySelectorAll('.category-nav li').forEach(li => li.classList.remove('related'));
             }
 
@@ -625,6 +759,17 @@
                 if (allCat) allCat.classList.add('active');
             }
             displayWorks(cat);
+        }
+
+        function filterWorks(cat, element) {
+            if (element && element.classList.contains('active') && cat !== 'all') {
+                const allCatBtn = document.getElementById('cat-all');
+                filterWorks('all', allCatBtn);
+                return;
+            }
+
+            filterWorksInternal(cat, element);
+            pushState();
         }
 
         function onLogoClick() {
@@ -642,6 +787,7 @@
 
         // 初期起動
         displayWorks('all');
+        pushState();
 
         // Fetch Data from GAS
         async function fetchWorks() {
