@@ -222,7 +222,7 @@
         function pushState() {
             if (isPerformingHistoryAction) return;
             const newState = getCurrentState();
-            
+
             // Avoid duplicate contiguous states
             if (historyIndex >= 0) {
                 const curState = historyStack[historyIndex];
@@ -510,6 +510,10 @@
                 detailTags.style.marginBottom = '1rem';
                 detailTags.style.fontSize = '0.8rem';
                 detailTags.style.color = '#666';
+
+                const labelSpan = document.createElement('span');
+                labelSpan.innerText = 'tag :';
+                detailTags.appendChild(labelSpan);
 
                 cats.forEach(c => {
                     const cleanTag = c.trim();
