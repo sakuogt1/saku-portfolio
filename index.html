@@ -515,14 +515,28 @@
                 labelSpan.innerText = 'tag :';
                 detailTags.appendChild(labelSpan);
 
+                const navCatElements = Array.from(document.querySelectorAll('.category-nav li'));
+                const navOrderMap = new Map();
+                navCatElements.forEach((el, index) => {
+                    if (el.dataset.cat) navOrderMap.set(el.dataset.cat, index);
+                });
+
+                cats.sort((a, b) => {
+                    const indexA = navOrderMap.has(a.trim()) ? navOrderMap.get(a.trim()) : 999;
+                    const indexB = navOrderMap.has(b.trim()) ? navOrderMap.get(b.trim()) : 999;
+                    return indexA - indexB;
+                });
+
                 cats.forEach(c => {
                     const cleanTag = c.trim();
+                    const targetLi = document.querySelector(`.category-nav li[data-cat="${cleanTag}"]`);
+                    const displayText = targetLi ? targetLi.innerText.trim() : cleanTag;
+
                     const span = document.createElement('span');
-                    span.innerText = cleanTag;
+                    span.innerText = displayText;
                     span.style.textDecoration = 'underline';
                     span.style.cursor = 'pointer';
                     span.onclick = () => {
-                        const targetLi = document.querySelector(`.category-nav li[data-cat="${cleanTag}"]`);
                         filterWorks(cleanTag, targetLi);
                     };
                     detailTags.appendChild(span);
